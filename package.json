@@ -1,0 +1,29 @@
+{
+  "name": "ai-agent-platform",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+  "start": "node dist/index.js",
+  "test:agent": "node dist/test-agent.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.2.8",
+    "@langchain/langgraph": "^1.4.10",
+    "@langchain/ollama": "^1.3.0",
+    "dotenv": "^17.4.2",
+    "fastify": "^5.12.0",
+    "langchain": "^1.5.9",
+    "zod": "^4.4.3"
+  }
+}
