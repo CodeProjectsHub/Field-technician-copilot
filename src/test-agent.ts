@@ -27,5 +27,9 @@ const data = await response.json();
 
 console.log(`Completed in ${elapsed}s\n`);
 console.log("========== PROMPT GENERATOR ==========\n");
-console.log(JSON.stringify(data, null, 2));
+console.log(data.prompt);
+
+console.log("\n========== DIAGNOSTIC AGENT ==========\n");
+console.log(JSON.stringify(data.diagnosis, null, 2));
+
 console.log("\n======================================\n");
