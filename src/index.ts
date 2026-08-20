@@ -175,7 +175,6 @@ app.post<{
     const lastMessage =
       result.messages[result.messages.length - 1];
 
-     //testing diagnose agent
     const generatedPrompt = lastMessage.content;
     const diagnosisResult = await diagnosticAgent.invoke({
       messages: [
@@ -185,14 +184,30 @@ app.post<{
         },
       ],
     });
+
     const elapsedMs = Date.now() - start;
 
-    return {
-      prompt: generatedPrompt,
-      diagnosis: diagnosisResult.structuredResponse,
-      elapsedMs,
-    };
+    // ----------------------------------------------
+// Extract Diagnostic Agent response
+// ----------------------------------------------
 
+const diagnosticMessage =
+  diagnosisResult.messages[diagnosisResult.messages.length - 1];
+
+const diagnosticContent = diagnosticMessage.content;
+
+if (typeof diagnosticContent !== "string") {
+  throw new Error(
+    "Diagnostic Agent returned non-text content"
+  );
+}
+
+const diagnosis = JSON.parse(diagnosticContent);
+  return {
+    prompt: generatedPrompt,
+    diagnosis,
+    elapsedMs,
+  };
   } catch (error) {
     request.log.error(error);
 
