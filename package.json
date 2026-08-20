@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-  "start": "node dist/index.js",
-  "test:agent": "node dist/test-agent.js"
+    "start": "node dist/index.js",
+    "test:agent": "node dist/test-agent.js",
+    "test:graph": "node dist/test-graph.js"
   },
   "keywords": [],
   "author": "",

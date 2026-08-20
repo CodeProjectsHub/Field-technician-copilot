@@ -2,12 +2,12 @@ import Fastify from "fastify";
 //import { createAgent } from "langchain";
 //import { ChatOllama } from "@langchain/ollama";
 //import { model } from "./models/ollama.js";
-import { promptAgent } from "./agents/prompt-agent.js";
-import { diagnosticAgent } from "./agents/diagnostic-agent.js";
+// import { promptAgent } from "./agents/prompt-agent.js";
+// import { diagnosticAgent } from "./agents/diagnostic-agent.js";
 // Uncomment when we are ready to enable tools.
 // import { tool } from "langchain";
 // import { z } from "zod";
-
+import { troubleshootingGraph } from "./graph/troubleshooting-graph.js";
 const app = Fastify({
   logger: true,
 });
@@ -156,58 +156,34 @@ app.post<{
     const start = Date.now();
 
     // ----------------------------------------------
-    // Run Prompt Generator Agent
-    // ----------------------------------------------
-
-    const result = await promptAgent.invoke({
-      messages: [
-        {
-          role: "user",
-          content: input,
-        },
-      ],
-    });
-   
-    // ----------------------------------------------
-    // Get final agent response
-    // ----------------------------------------------
-
-    const lastMessage =
-      result.messages[result.messages.length - 1];
-
-    const generatedPrompt = lastMessage.content;
-    const diagnosisResult = await diagnosticAgent.invoke({
-      messages: [
-        {
-          role: "user",
-          content: generatedPrompt,
-        },
-      ],
-    });
-
-    const elapsedMs = Date.now() - start;
-
-    // ----------------------------------------------
-// Extract Diagnostic Agent response
+// Run LangGraph
+// ----------------------------------------------
+//
+// LangGraph is now responsible for orchestrating
+// Agent 1 and Agent 2.
+//
+// Flow:
+//
+// technician input
+//       ↓
+// Prompt Generator
+//       ↓
+// Diagnostic Agent
+//       ↓
+// graph result
 // ----------------------------------------------
 
-const diagnosticMessage =
-  diagnosisResult.messages[diagnosisResult.messages.length - 1];
+const graphResult = await troubleshootingGraph.invoke({
+  technicianInput: input,
+});
 
-const diagnosticContent = diagnosticMessage.content;
+const elapsedMs = Date.now() - start;
 
-if (typeof diagnosticContent !== "string") {
-  throw new Error(
-    "Diagnostic Agent returned non-text content"
-  );
-}
-
-const diagnosis = JSON.parse(diagnosticContent);
-  return {
-    prompt: generatedPrompt,
-    diagnosis,
-    elapsedMs,
-  };
+return {
+  prompt: graphResult.generatedPrompt,
+  diagnosis: graphResult.diagnosis,
+  elapsedMs,
+};
   } catch (error) {
     request.log.error(error);
 
