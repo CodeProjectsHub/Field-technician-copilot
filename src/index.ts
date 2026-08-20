@@ -1,7 +1,9 @@
 import Fastify from "fastify";
-import { createAgent } from "langchain";
-import { ChatOllama } from "@langchain/ollama";
-
+//import { createAgent } from "langchain";
+//import { ChatOllama } from "@langchain/ollama";
+//import { model } from "./models/ollama.js";
+import { promptAgent } from "./agents/prompt-agent.js";
+import { diagnosticAgent } from "./agents/diagnostic-agent.js";
 // Uncomment when we are ready to enable tools.
 // import { tool } from "langchain";
 // import { z } from "zod";
@@ -14,13 +16,13 @@ const app = Fastify({
 // 1. LOCAL LLM
 // ==================================================
 
-const model = new ChatOllama({
-  model: "qwen3:1.7b",
-  temperature: 0.2,
-  numCtx: 4096,
-  think: false,
-  baseUrl: "http://127.0.0.1:11434",
-});
+// const model = new ChatOllama({
+//   model: "qwen3:1.7b",
+//   temperature: 0.2,
+//   numCtx: 4096,
+//   think: false,
+//   baseUrl: "http://127.0.0.1:11434",
+// });
 
 // ==================================================
 // 2. ZOD SCHEMA + TOOL
@@ -58,67 +60,67 @@ const model = new ChatOllama({
 // 3. PROMPT GENERATOR AGENT
 // ==================================================
 
-const agent = createAgent({
-  model,
+// const agent = createAgent({
+//   model,
 
-  // Tools are intentionally disabled for now.
-  //
-  // When ready:
-  //
-  // tools: [technicianReferenceTool],
+//   // Tools are intentionally disabled for now.
+//   //
+//   // When ready:
+//   //
+//   // tools: [technicianReferenceTool],
 
-  tools: [],
+//   tools: [],
 
-  systemPrompt: `
-You are a Prompt Generator Agent.
+//   systemPrompt: `
+// You are a Prompt Generator Agent.
 
-Your ONLY job is to convert the user's free-text request
-into a prompt that will be given to another AI agent.
+// Your ONLY job is to convert the user's free-text request
+// into a prompt that will be given to another AI agent.
 
-You are NOT the final answering agent.
+// You are NOT the final answering agent.
 
-NEVER answer the user's original request.
+// NEVER answer the user's original request.
 
-NEVER provide the actual solution, instructions,
-steps, explanation, or final answer to the user's task.
+// NEVER provide the actual solution, instructions,
+// steps, explanation, or final answer to the user's task.
 
-Instead, understand the user's intent and create a
-clear prompt that instructs another AI agent to perform
-the requested task.
+// Instead, understand the user's intent and create a
+// clear prompt that instructs another AI agent to perform
+// the requested task.
 
-The generated prompt should include, when relevant:
+// The generated prompt should include, when relevant:
 
-- Role
-  What role the downstream AI should take.
+// - Role
+//   What role the downstream AI should take.
 
-- Objective
-  What the downstream AI needs to accomplish.
+// - Objective
+//   What the downstream AI needs to accomplish.
 
-- Context
-  Important information provided by the user.
+// - Context
+//   Important information provided by the user.
 
-- Instructions
-  How the downstream AI should approach the task.
+// - Instructions
+//   How the downstream AI should approach the task.
 
-- Constraints
-  Important limitations or requirements.
+// - Constraints
+//   Important limitations or requirements.
 
-- Expected Output
-  What the downstream AI should return.
+// - Expected Output
+//   What the downstream AI should return.
 
-Preserve important details from the user's request.
+// Preserve important details from the user's request.
 
-Do not invent unnecessary requirements.
+// Do not invent unnecessary requirements.
 
-If information is missing, make a reasonable assumption
-instead of asking the user unnecessary questions.
+// If information is missing, make a reasonable assumption
+// instead of asking the user unnecessary questions.
 
-Keep the generated prompt concise, practical, and
-specific enough for another AI agent to execute.
+// Keep the generated prompt concise, practical, and
+// specific enough for another AI agent to execute.
 
-Return ONLY the generated prompt.
-`,
-});
+// Return ONLY the generated prompt.
+// `,
+// });
 
 
 // ==================================================
@@ -157,7 +159,7 @@ app.post<{
     // Run Prompt Generator Agent
     // ----------------------------------------------
 
-    const result = await agent.invoke({
+    const result = await promptAgent.invoke({
       messages: [
         {
           role: "user",
@@ -165,7 +167,7 @@ app.post<{
         },
       ],
     });
-
+   
     // ----------------------------------------------
     // Get final agent response
     // ----------------------------------------------
@@ -173,10 +175,21 @@ app.post<{
     const lastMessage =
       result.messages[result.messages.length - 1];
 
+     //testing diagnose agent
+    const generatedPrompt = lastMessage.content;
+    const diagnosisResult = await diagnosticAgent.invoke({
+      messages: [
+        {
+          role: "user",
+          content: generatedPrompt,
+        },
+      ],
+    });
     const elapsedMs = Date.now() - start;
 
     return {
-      response: lastMessage.content,
+      prompt: generatedPrompt,
+      diagnosis: diagnosisResult.structuredResponse,
       elapsedMs,
     };
 
