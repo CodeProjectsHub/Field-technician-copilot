@@ -13,11 +13,11 @@ import { troubleshootingGraph } from "./graph/troubleshooting-graph.js";
 // Final graph state
 // ==================================================
 
-const technicianInput =
-  "Customer has no internet connection. " +
-  "The router has power but the WAN light is red. " +
-  "Please troubleshoot the issue step by step.";
-//const technicianInput = "Why?"
+// const technicianInput =
+//   "Customer has no internet connection. " +
+//   "The router has power but the WAN light is red. " +
+//   "Please troubleshoot the issue step by step.";
+const technicianInput = "Why?"
 
 console.log("Starting LangGraph...\n");
 

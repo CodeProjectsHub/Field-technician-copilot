@@ -182,6 +182,7 @@ const elapsedMs = Date.now() - start;
 return {
   prompt: graphResult.generatedPrompt,
   diagnosis: graphResult.diagnosis,
+  finalResponse : graphResult.finalResponse,
   elapsedMs,
 };
   } catch (error) {
