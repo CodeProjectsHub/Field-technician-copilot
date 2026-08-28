@@ -38,7 +38,10 @@ export async function diagnosticNode(
       "Diagnostic Agent returned non-text content"
     );
   }
-
+  console.log(
+    "RAW DIAGNOSTIC RESPONSE:",
+    lastMessage.content
+  );
   const diagnosis = JSON.parse(lastMessage.content);
 
   // Return only the state field this node is responsible for.

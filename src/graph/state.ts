@@ -23,6 +23,9 @@ import type { TechnicianResponse } from "../schemas/technician-response.js";
 export const TroubleshootingState = Annotation.Root({
   technicianInput: Annotation<string>,
 
+  // Existing context from the current troubleshooting session.
+  currentContext: Annotation<string>,
+
   generatedPrompt: Annotation<string>,
 
   diagnosis: Annotation<Diagnosis>,

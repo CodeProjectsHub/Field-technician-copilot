@@ -141,9 +141,10 @@ app.get("/health", async () => {
 app.post<{
   Body: {
     input: string;
+    context?: string;
   };
 }>("/api/agent", async (request, reply) => {
-  const { input } = request.body;
+  const { input, context } = request.body;
 
   // Basic validation
   if (!input || typeof input !== "string") {
@@ -175,6 +176,7 @@ app.post<{
 
 const graphResult = await troubleshootingGraph.invoke({
   technicianInput: input,
+  currentContext: context ?? "",
 });
 
 const elapsedMs = Date.now() - start;
@@ -183,7 +185,9 @@ return {
   prompt: graphResult.generatedPrompt,
   diagnosis: graphResult.diagnosis,
   finalResponse : graphResult.finalResponse,
+  context: graphResult.currentContext,
   elapsedMs,
+
 };
   } catch (error) {
     request.log.error(error);
