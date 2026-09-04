@@ -78,6 +78,7 @@ Diagnostic Agent to:
 2. Avoid making a specific diagnosis.
 3. Identify the most important information that the
    technician should provide next.
+4. If there is a question asked along with the current context, focus more on the question
 
 Keep the generated prompt concise, practical, and specific
 enough for the Diagnostic Agent to execute.

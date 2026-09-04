@@ -55,7 +55,6 @@ const app = Fastify({
 //
 // ==================================================
 
-
 // ==================================================
 // 3. PROMPT GENERATOR AGENT
 // ==================================================
@@ -122,7 +121,6 @@ const app = Fastify({
 // `,
 // });
 
-
 // ==================================================
 // 4. HEALTH CHECK
 // ==================================================
@@ -132,7 +130,6 @@ app.get("/health", async () => {
     status: "ok",
   };
 });
-
 
 // ==================================================
 // 5. PROMPT GENERATOR API
@@ -145,7 +142,7 @@ app.post<{
   };
 }>("/api/agent", async (request, reply) => {
   const { input, context } = request.body;
-
+  console.log("API input " + JSON.stringify(request.body));
   // Basic validation
   if (!input || typeof input !== "string") {
     return reply.status(400).send({
@@ -157,50 +154,45 @@ app.post<{
     const start = Date.now();
 
     // ----------------------------------------------
-// Run LangGraph
-// ----------------------------------------------
-//
-// LangGraph is now responsible for orchestrating
-// Agent 1 and Agent 2.
-//
-// Flow:
-//
-// technician input
-//       ↓
-// Prompt Generator
-//       ↓
-// Diagnostic Agent
-//       ↓
-// graph result
-// ----------------------------------------------
+    // Run LangGraph
+    // ----------------------------------------------
+    //
+    // LangGraph is now responsible for orchestrating
+    // Agent 1 and Agent 2.
+    //
+    // Flow:
+    //
+    // technician input
+    //       ↓
+    // Prompt Generator
+    //       ↓
+    // Diagnostic Agent
+    //       ↓
+    // graph result
+    // ----------------------------------------------
 
-const graphResult = await troubleshootingGraph.invoke({
-  technicianInput: input,
-  currentContext: context ?? "",
-});
+    const graphResult = await troubleshootingGraph.invoke({
+      technicianInput: input,
+      currentContext: context ?? "",
+    });
 
-const elapsedMs = Date.now() - start;
+    const elapsedMs = Date.now() - start;
 
-return {
-  prompt: graphResult.generatedPrompt,
-  diagnosis: graphResult.diagnosis,
-  finalResponse : graphResult.finalResponse,
-  context: graphResult.currentContext,
-  elapsedMs,
-
-};
+    return {
+      prompt: graphResult.generatedPrompt,
+      diagnosis: graphResult.diagnosis,
+      finalResponse: graphResult.finalResponse,
+      context: graphResult.currentContext,
+      elapsedMs,
+    };
   } catch (error) {
     request.log.error(error);
 
     return reply.status(500).send({
-      error:
-        error instanceof Error
-          ? error.message
-          : String(error),
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 });
-
 
 // ==================================================
 // 6. START SERVER
@@ -213,10 +205,7 @@ const start = async () => {
       host: "0.0.0.0",
     });
 
-    console.log(
-      "API running on http://localhost:3000"
-    );
-
+    console.log("API running on http://localhost:3000");
   } catch (error) {
     app.log.error(error);
     process.exit(1);

@@ -29,9 +29,7 @@ import { TroubleshootingState } from "../state.js";
 // clarification response
 // ==================================================
 
-export function decisionNode(
-  state: typeof TroubleshootingState.State
-) {
+export function decisionNode(state: typeof TroubleshootingState.State) {
   const confidence = state.diagnosis.confidence;
 
   if (confidence === "low") {
